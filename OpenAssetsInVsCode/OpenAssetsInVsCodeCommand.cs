@@ -68,6 +68,9 @@ namespace OpenAssetsInVsCode
             }
         }
 
+        /// <summary>
+        /// Current Visual Studio object model
+        /// </summary>
         public static DTE2 _dte = null;
 
         /// <summary>
@@ -97,7 +100,9 @@ namespace OpenAssetsInVsCode
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            string solutionPath = null;
+            string solutionPath = String.Empty;
+            string assetsDir = String.Empty;
+            string configFilePath = String.Empty;
 
             try {
                 solutionPath = Path.GetDirectoryName(_dte.Solution.FullName);
@@ -112,8 +117,15 @@ namespace OpenAssetsInVsCode
                 return;
             }
 
+            configFilePath = solutionPath + "assetsconfig.json";
+
+            if (File.Exists(configFilePath)) {
+                // TODO: Eğer solution path'de json dosyası mevcutsa içinden AssetsDirectory ile path alıp assetsDir'e set edilmeli
+                // bu dosya yoksa aşağıda regex ile Assets isimli klasör bulunup assetsDir'e set edilmeli
+            }
+
             Array subDirectories = Directory.GetDirectories(solutionPath);
-            string assetsDir = null;
+            
             Regex reg = new Regex(@"([a-z]|[A-Z]).*\/?(Assets)");
 
             foreach (string dir in subDirectories) {
@@ -123,7 +135,7 @@ namespace OpenAssetsInVsCode
                 }
             }
 
-            if (assetsDir == null)
+            if (String.IsNullOrEmpty(assetsDir))
             {
                 VsShellUtilities.ShowMessageBox(
                     this.package,
@@ -134,7 +146,7 @@ namespace OpenAssetsInVsCode
                     OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
                 return;
             }
-            
+
             System.Diagnostics.Process proc = new System.Diagnostics.Process();
             proc.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             proc.StartInfo.FileName = "CMD.exe";
