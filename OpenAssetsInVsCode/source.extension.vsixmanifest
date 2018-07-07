@@ -4,7 +4,11 @@
         <Identity Id="OpenAssetsInVsCode.ce3f1b72-f171-46d7-b442-32edd0621d66" Version="1.0" Language="en-US" Publisher="Tufan Tunç" />
         <DisplayName>Open Assets Folder in VS Code</DisplayName>
         <Description xml:space="preserve">This extension adds new solution context menu itemThis extension adds</Description>
-        <Tags>visual studio, vs code, open folder</Tags>
+        <License>LICENSE.txt</License>
+        <ReleaseNotes>CHANGELOG.txt</ReleaseNotes>
+        <Icon>icon.png</Icon>
+        <PreviewImage>preview.png</PreviewImage>
+        <Tags>visual studio, vs code, open folder, open assets</Tags>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[15.0, 16.0)" />

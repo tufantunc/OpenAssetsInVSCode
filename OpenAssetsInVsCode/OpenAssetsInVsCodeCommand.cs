@@ -164,7 +164,7 @@ namespace OpenAssetsInVsCode
                 proc.StartInfo.FileName = "CMD.exe";
                 proc.StartInfo.Arguments = "/C code .";
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 proc.StartInfo.FileName = "/bin/bash";
                 proc.StartInfo.Arguments = "-c code .";
