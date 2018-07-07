@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Design;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Newtonsoft.Json;
 using Task = System.Threading.Tasks.Task;
 
 namespace OpenAssetsInVsCode
@@ -90,6 +92,13 @@ namespace OpenAssetsInVsCode
         }
 
         /// <summary>
+        /// Assets config file class
+        /// </summary>
+        public class AssetsConfigFile {
+            public string CustomAssetDirPath { get; set; }
+        }
+
+        /// <summary>
         /// This function is the callback used to execute the command when the menu item is clicked.
         /// See the constructor to see how the menu item is associated with this function using
         /// OleMenuCommandService service and MenuCommand class.
@@ -100,40 +109,39 @@ namespace OpenAssetsInVsCode
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            string solutionPath = String.Empty;
+            string solutionPath = Path.GetDirectoryName(_dte.Solution.FullName);
             string assetsDir = String.Empty;
-            string configFilePath = String.Empty;
-
-            try {
-                solutionPath = Path.GetDirectoryName(_dte.Solution.FullName);
-            } catch {
-                VsShellUtilities.ShowMessageBox(
-                    this.package,
-                    "You should open a solution.",
-                    "Open Assets In VS Code",
-                    OLEMSGICON.OLEMSGICON_INFO,
-                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                return;
-            }
-
-            configFilePath = solutionPath + "assetsconfig.json";
+            string configFilePath = Path.Combine(solutionPath, "assetsconfig.json");
 
             if (File.Exists(configFilePath)) {
-                // TODO: Eğer solution path'de json dosyası mevcutsa içinden AssetsDirectory ile path alıp assetsDir'e set edilmeli
-                // bu dosya yoksa aşağıda regex ile Assets isimli klasör bulunup assetsDir'e set edilmeli
-            }
+                AssetsConfigFile jsonData = new AssetsConfigFile();
 
-            Array subDirectories = Directory.GetDirectories(solutionPath);
-            
-            Regex reg = new Regex(@"([a-z]|[A-Z]).*\/?(Assets)");
+                using (StreamReader r = new StreamReader(configFilePath))
+                {
+                    string json = r.ReadToEnd();
+                    jsonData = JsonConvert.DeserializeObject<AssetsConfigFile>(json);
+                }
 
-            foreach (string dir in subDirectories) {
-                if (reg.Match(dir).Success) {
-                    assetsDir = dir;
-                    break;
+                if (jsonData.CustomAssetDirPath != null)
+                {
+                    assetsDir = Path.Combine(solutionPath, jsonData.CustomAssetDirPath);
                 }
             }
+            else {
+                Array subDirectories = Directory.GetDirectories(solutionPath);
+
+                Regex reg = new Regex(@"([a-z]|[A-Z]).*\/?(Assets)");
+
+                foreach (string dir in subDirectories)
+                {
+                    if (reg.Match(dir).Success)
+                    {
+                        assetsDir = dir;
+                        break;
+                    }
+                }
+            }
+            
 
             if (String.IsNullOrEmpty(assetsDir))
             {
@@ -149,8 +157,19 @@ namespace OpenAssetsInVsCode
 
             System.Diagnostics.Process proc = new System.Diagnostics.Process();
             proc.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-            proc.StartInfo.FileName = "CMD.exe";
-            proc.StartInfo.Arguments = "/C code " + assetsDir;
+            proc.StartInfo.WorkingDirectory = assetsDir;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                proc.StartInfo.FileName = "CMD.exe";
+                proc.StartInfo.Arguments = "/C code .";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                proc.StartInfo.FileName = "/bin/bash";
+                proc.StartInfo.Arguments = "-c code .";
+            }
+            
             proc.Start();
         }
     }
