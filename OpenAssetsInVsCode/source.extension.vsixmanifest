@@ -6,8 +6,8 @@
         <Description xml:space="preserve">This extension adds new solution context menu itemThis extension adds</Description>
         <License>LICENSE.txt</License>
         <ReleaseNotes>CHANGELOG.txt</ReleaseNotes>
-        <Icon>icon.png</Icon>
-        <PreviewImage>preview.png</PreviewImage>
+        <Icon>Resources\logo.png</Icon>
+        <PreviewImage>Resources\preview.png</PreviewImage>
         <Tags>visual studio, vs code, open folder, open assets</Tags>
     </Metadata>
     <Installation>
