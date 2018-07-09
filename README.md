@@ -23,6 +23,21 @@ You can open assets folder in Visual Studio Code by simply right-clicking it in 
 
 ![Open assets folder in VS Code](assets/context-menu.png)
 
+On default, extension looks for [anyname].assets folder in solution folder. If it finds, it will run VS Code in that directory.
+
+### Create custom config file
+
+If your directory structure different than extension defaults, you can customize it to your own structure.
+
+Just create a assetsconfig.json file in your solution folder and add your folder path.
+
+E.g.
+```javascript
+{
+    CustomAssetDirPath: "MyOwnAssetFolder"
+}
+```
+
 ## Contribute
 Check out the [contribution guidelines](CONTRIBUTING.md)
 if you want to contribute to this project.
